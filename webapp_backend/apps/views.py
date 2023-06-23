@@ -20,10 +20,11 @@ def login(request:WSGIRequest):
                     "first_name": user.first_name,
                     "middle_name": user.middle_name,
                     "last_name": user.last_name,
-                    "avatar": user.avatar.url,
-                    "phonenumber": user.phonenumber,
+                    # "avatar": user.avatar.url,
+                    "phonenumber": str(user.phonenumber),
                     "birth": user.birth
                 }
+                if user.avatar: response['avatar'] = user.avatar.url
                 return JsonResponse(response)
             else:
                 return HttpResponseNotFound("Your email or password is incorrect.")
@@ -42,13 +43,15 @@ def signup(request:WSGIRequest):
                         first_name=request.POST['first_name'],
                         middle_name=request.POST['middle_name'],
                         last_name=request.POST['last_name'],
-                        avatar=request.FILES['avatar'],
+                        # avatar=request.FILES['avatar'],
                         phonenumber=request.POST['phonenumber'],
                         birth=request.POST['birth'])
+            if request.FILES: user.avatar = request.FILES['avatar']
+            user.save()
             return HttpResponse()
         except Exception as e:
             print(e)
-            return HttpResponse(status=500)
+            return HttpResponse(e, status=500)
     else:
         return HttpResponseForbidden(f"This API does not allow {request.method} requests.")
 

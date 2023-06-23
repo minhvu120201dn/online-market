@@ -1,3 +1,5 @@
+import { useContext, useEffect } from 'react';
+
 import 'bootstrap/dist/css/bootstrap.css';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
@@ -5,10 +7,13 @@ import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
-import { SearchIcon, BellIcon, PenIcon, ChatIcon, Logo } from './commons/icons';
-import { LoginButton } from './login';
+import { SearchIcon, BellIcon, PenIcon, ChatIcon, Logo } from '../commons/icons';
+import SigninButton from './signin';
+import { UserContext } from '../contexts/user.context';
 
 function Header() {
+  const { user } = useContext(UserContext);
+
   return (
     <Navbar bg="light" expand="lg">
       <Container fluid>
@@ -34,7 +39,7 @@ function Header() {
           <Button variant="success" className="me-5"><PenIcon/> Post</Button>
           <Button variant="info" className="me-2"><ChatIcon/> Chat</Button>
           <Button variant="warning" className="me-2"><BellIcon/> Notifications</Button>
-          <LoginButton variant="danger" className="me-1">Login</LoginButton>
+          { !user ? <SigninButton variant="danger" className="me-1">Sign In</SigninButton> : user.email }
         </Navbar.Collapse>
       </Container>
     </Navbar>

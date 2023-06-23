@@ -1,54 +1,52 @@
-import axios from 'axios';
-import React, { useState, createContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SignupButton } from './signup';
+import UserService from '../services/user.service';
+import { UserContext } from '../contexts/user.context';
 
-const UserContext = createContext();
+function SigninButton(props) {
+  const { setUser } = useContext(UserContext);
 
-function LoginButton(props) {
-  const [show, setShow] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState('');
+  const [error, setError] = useState();
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleClose = () => setShowModal(false);
+  const handleShow = () => setShowModal(true);
 
-  const handleLogin = () => {
-    // Perform login logic here
-    axios.post('http://localhost:8000/auth/login/', {
-      email: email,
-      password: password
-    })
-      .then(response => {
-        console.log(response.data);
-        setUser(response.data);
+  const handleSignin = () => {
+    // Send data to server
+    UserService.signin(email, password)
+      .then(res => {
+        setUser(res.data);
+        // Reset form fields
+        setEmail('');
+        setPassword('');
+        // Close the modal
+        handleClose();
       })
-      .catch(error => {
-        console.error(error);
-    });
-
-    // Reset form fields
-    setEmail('');
-    setPassword('');
-
-    // Close the modal
-    handleClose();
+      .catch(err => {
+        setError(err.response.data);
+      });;
   };
+  
+  // useEffect(() => {
+  //   console.log(user);
+  // })
 
   return (
-    <UserContext.Provider value={{user}}>
+    <>
       <Button variant={props.variant} onClick={handleShow}>
-        Log In
+        Sign In
       </Button>
-
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Login</Modal.Title>
+          <Modal.Title>Sign In</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -72,6 +70,7 @@ function LoginButton(props) {
               />
             </Form.Group>
           </Form>
+          <p style={{color:"red"}}>{error}</p>
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-between">
           <SignupButton variant="primary" onClick={handleClose}>
@@ -81,14 +80,14 @@ function LoginButton(props) {
             <Button variant="secondary" onClick={handleClose} className="me-2">
                 Close
             </Button>
-            <Button variant="danger" onClick={handleLogin}>
-                Log In
+            <Button variant="danger" onClick={handleSignin}>
+                Sign In
             </Button>
           </div>
         </Modal.Footer>
       </Modal>
-    </UserContext.Provider>
+    </>
   );
 }
 
-export { UserContext, LoginButton };
+export default SigninButton;

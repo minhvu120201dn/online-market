@@ -1,38 +1,51 @@
-import axios from 'axios';
 import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import UserService from '../services/user.service';
 
 function SignupButton(props) {
   const [show, setShow] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [password2, setPassword2] = useState('');
-  const [firstname, setFirstname] = useState('');
-  const [middlename, setMiddlename] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [avatar, setAvatar] = useState('');
-  const [phonenumber, setPhonenumber] = useState('');
-  const [birth, setBirth] = useState('');
+
+  const initialValues = {email:'',password:'',password2:'',first_name:'',middle_name:'',last_name:''}
+  const [formValues, setFormValues] = useState(initialValues);
+  const [formErrors, setFormErrors] = useState({});
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const handleSignup = () => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+  }
+
+  const validateForm = (values) => {
+    const errors = {};
+    var valid = true;
+    const keys = ['email', 'password', 'password2', 'first_name', 'last_name', 'phonenumber', 'birth'];
+    for (const key of keys) {
+      if (!values[key]) {
+        errors[key] = "This field is required.";
+        valid = false;
+      }
+    }
+    if (values.password !== values.password2) {
+      errors.password2 = "Your passwords do not match.";
+      valid = false;
+    }
+    setFormErrors(errors);
+    return valid;
+  }
+
+  const handleSubmit = () => {
     // Perform signup logic here
-    const uploadData = new FormData();
-    uploadData.append('email', email);
-    uploadData.append('password', password);
-    uploadData.append('first_name', firstname);
-    uploadData.append('middle_name', middlename);
-    uploadData.append('last_name', lastname);
-    uploadData.append('avatar', avatar);
-    uploadData.append('phonenumber', phonenumber);
-    uploadData.append('birth', birth);
-    axios.post('http://localhost:8000/auth/signup/', uploadData)
+    if (!validateForm(formValues)) {
+      return;
+    }
+    // console.log(formValues)
+    UserService.signup(formValues)
       .then(response => {
         console.log(response.data);
       })
@@ -41,15 +54,7 @@ function SignupButton(props) {
     });
 
     // Reset form fields
-    setEmail('');
-    setPassword('');
-    setPassword2('');
-    setFirstname('');
-    setMiddlename('');
-    setLastname('');
-    setAvatar(null);
-    setPhonenumber('');
-    setBirth('');
+    setFormValues(initialValues);
 
     // Close the modal
     handleClose();
@@ -68,62 +73,74 @@ function SignupButton(props) {
         <Modal.Body>
           <Form>
             <Form.Group controlId="formEmail">
-              <Form.Label>Email address</Form.Label>
+              <Form.Label>Email address <span style={{color:'red'}}>*</span></Form.Label>
               <Form.Control
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formValues.email}
+                onChange={handleChange}
               />
             </Form.Group>
+            <p style={{color:"red"}}>{formErrors.email}</p>
 
             <Form.Group controlId="formPassword" style={{marginTop:"1rem"}}>
-              <Form.Label>Password</Form.Label>
+              <Form.Label>Password <span style={{color:'red'}}>*</span></Form.Label>
               <Form.Control
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={formValues.password}
+                onChange={handleChange}
               />
             </Form.Group>
+            <p style={{color:"red"}}>{formErrors.password}</p>
 
             <Form.Group controlId="formPassword2" style={{marginTop:"1rem"}}>
-              <Form.Label>Confirm Password</Form.Label>
+              <Form.Label>Confirm Password <span style={{color:'red'}}>*</span></Form.Label>
               <Form.Control
                 type="password"
-                value={password2}
-                onChange={(e) => setPassword2(e.target.value)}
+                name="password2"
+                value={formValues.password2}
+                onChange={handleChange}
               />
             </Form.Group>
+            <p style={{color:"red"}}>{formErrors.password2}</p>
 
             <div className="row">
                 <div className="col-md-4">
                     <Form.Group controlId="formPassword" style={{marginTop:"1rem"}}>
-                        <Form.Label>First name</Form.Label>
+                        <Form.Label>First name <span style={{color:'red'}}>*</span></Form.Label>
                         <Form.Control
                             type="text"
-                            value={firstname}
-                            onChange={(e) => setFirstname(e.target.value)}
+                            name="first_name"
+                            value={formValues.first_name}
+                            onChange={handleChange}
                         />
                     </Form.Group>
+                    <p style={{color:"red"}}>{formErrors.first_name}</p>
                 </div>
                 <div className="col-md-4">
                     <Form.Group controlId="formPassword" style={{marginTop:"1rem"}}>
                         <Form.Label>Middle name</Form.Label>
                         <Form.Control
                             type="text"
-                            value={middlename}
-                            onChange={(e) => setMiddlename(e.target.value)}
+                            name="middle_name"
+                            value={formValues.middle_name}
+                            onChange={handleChange}
                         />
                     </Form.Group>
+                    <p style={{color:"red"}}>{formErrors.middle_name}</p>
                 </div>
                 <div className="col-md-4">
                     <Form.Group controlId="formPassword" style={{marginTop:"1rem"}}>
-                        <Form.Label>Last name</Form.Label>
+                        <Form.Label>Last name <span style={{color:'red'}}>*</span></Form.Label>
                         <Form.Control
                             type="text"
-                            value={lastname}
-                            onChange={(e) => setLastname(e.target.value)}
+                            name="last_name"
+                            value={formValues.last_name}
+                            onChange={handleChange}
                         />
                     </Form.Group>
+                    <p style={{color:"red"}}>{formErrors.last_name}</p>
                 </div>
             </div>
 
@@ -131,36 +148,41 @@ function SignupButton(props) {
                 <Form.Label style={{marginTop:"1rem"}}>Avatar</Form.Label>
                 <Form.Control
                     type="file"
-                    id="avatar"
+                    name="avatar"
                     accept="image/jpeg,image/png,image/gif"
-                    onChange={(e) => setAvatar(e.target.files[0])}
+                    onChange={handleChange}
                 />
             </Form.Group>
+            <p style={{color:"red"}}>{formErrors.avatar}</p>
 
             <Form.Group>
-                <Form.Label style={{marginTop:"1rem"}}>Phone number</Form.Label>
+                <Form.Label style={{marginTop:"1rem"}}>Phone number <span style={{color:'red'}}>*</span></Form.Label>
                 <Form.Control
                     type="tel"
-                    value={phonenumber}
-                    onChange={(e) => setPhonenumber(e.target.value)}
+                    name="phonenumber"
+                    value={formValues.phonenumber}
+                    onChange={handleChange}
                 />
             </Form.Group>
+            <p style={{color:"red"}}>{formErrors.phonenumber}</p>
 
             <Form.Group>
-                <Form.Label style={{marginTop:"1rem"}}>Birth date</Form.Label>
+                <Form.Label style={{marginTop:"1rem"}}>Birth date <span style={{color:'red'}}>*</span></Form.Label>
                 <Form.Control
                     type="date"
-                    value={birth}
-                    onChange={(e) => setBirth(e.target.value)}
+                    name="birth"
+                    value={formValues.birth}
+                    onChange={handleChange}
                 />
             </Form.Group>
           </Form>
+          <p style={{color:"red"}}>{formErrors.birth}</p>
         </Modal.Body>
         <Modal.Footer>
             <Button variant="secondary" onClick={handleClose} className="me-2">
                 Close
             </Button>
-            <Button variant="primary" onClick={handleSignup}>
+            <Button variant="primary" onClick={handleSubmit}>
                 Sign up
             </Button>
         </Modal.Footer>
