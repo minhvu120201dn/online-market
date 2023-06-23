@@ -46,6 +46,7 @@ def signup(request:WSGIRequest):
                         # avatar=request.FILES['avatar'],
                         phonenumber=request.POST['phonenumber'],
                         birth=request.POST['birth'])
+            print(request.FILES)
             if request.FILES: user.avatar = request.FILES['avatar']
             user.save()
             return HttpResponse()

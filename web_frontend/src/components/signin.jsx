@@ -41,9 +41,10 @@ function SigninButton(props) {
 
   return (
     <>
-      <Button variant={props.variant} onClick={handleShow}>
-        Sign In
+      <Button variant={props.variant} className={props.className} onClick={handleShow}>
+        {props.children}
       </Button>
+
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Sign In</Modal.Title>

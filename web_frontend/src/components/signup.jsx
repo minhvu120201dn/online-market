@@ -18,7 +18,8 @@ function SignupButton(props) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
+    if (name === 'avatar') setFormValues({ ...formValues, [name]: e.target.files[0] })
+    else setFormValues({ ...formValues, [name]: value });
   }
 
   const validateForm = (values) => {
